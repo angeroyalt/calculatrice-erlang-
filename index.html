@@ -1,0 +1,26 @@
+/**
+ * Calcule le nombre de canaux nécessaires
+ * @param {number} A - Trafic en Erlangs (ex: 15.5)
+ * @param {number} PrCible - Probabilité de blocage (ex: 0.01 pour 1%)
+ * @returns {number} N - Le nombre de canaux minimum
+ */
+function trouverNombreCanaux(A, PrCible) {
+    let N = 0;
+    let B = 1.0; // Probabilité de blocage initiale pour N=0
+
+    // Tant que le blocage est plus élevé que ce qu'on accepte
+    while (B > PrCible) {
+        N = N + 1;
+        
+        // Formule de récurrence d'Erlang-B :
+        // B(N, A) = (A * B(N-1)) / (N + A * B(N-1))
+        B = (A * B) / (N + A * B);
+    }
+
+    return N;
+}
+
+// Exemple d'utilisation :
+let erlangs = 20; 
+let proba = 0.01; // 1%
+console.log("Nombre de canaux requis : " + trouverNombreCanaux(erlangs, proba));
