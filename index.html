@@ -1,27 +1,145 @@
-/**
- * Calcule le nombre de canaux nécessaires
- * @param {number} A - Trafic en Erlangs (ex: 15.5)
- * @param {number} PrCible - Probabilité de blocage (ex: 0.01 pour 1%)
- * @returns {number} N - Le nombre de canaux minimum
- */
-function trouverNombreCanaux(A, PrCible) {
-    let N = 0;
-    let B = 1.0; // Probabilité de blocage initiale pour N=0
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erlang-B Professionnel | Royal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
 
-    // Tant que le blocage est plus élevé que ce qu'on accepte
-    while (B > PrCible) {
-        N = N + 1;
-        
-        // Formule de récurrence d'Erlang-B :
-        // B(N, A) = (A * B(N-1)) / (N + A * B(N-1))
-        B = (A * B) / (N + A * B);
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
 
-    return N;
-}
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 450px;
+        }
 
-// Exemple d'utilisation :
-let erlangs = 20; 
-let proba = 0.01; // 1%
-console.log("Nombre de canaux requis : " + trouverNombreCanaux(erlangs, proba));
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--primary);
+        }
 
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .result-card {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #eff6ff;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #dbeafe;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            text-align: center;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculateur Erlang-B</h1>
+    
+    <div class="input-group">
+        <label for="traffic">Trafic offert (en Erlangs)</label>
+        <input type="number" id="traffic" placeholder="Ex: 15.5" step="0.1">
+    </div>
+
+    <div class="input-group">
+        <label for="blocking">Probabilité de blocage (ex: 0.01)</label>
+        <input type="number" id="blocking" placeholder="Ex: 0.02" step="0.001">
+    </div>
+
+    <button onclick="calculate()">Calculer les ressources</button>
+
+    <div id="resultBox" class="result-card" style="display: none;">
+        <span style="font-size: 0.9rem; color: #64748b;">Nombre de canaux requis :</span>
+        <span id="channelsResult" class="result-value">0</span>
+    </div>
+
+    <div class="footer">
+        Outil de dimensionnement réseau professionnel
+    </div>
+</div>
+
+<script>
+    function erlangB(A, N) {
+        let B = 1.0;
+        for (let i = 1; i <= N; i++) {
+            B = (A * B) / (i + A * B);
+        }
+        return B;
