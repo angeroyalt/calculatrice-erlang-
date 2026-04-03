@@ -56,6 +56,14 @@
         }
         .res-label { color: #1967d2; font-size: 0.9rem; margin-bottom: 5px; }
         .res-value { font-size: 1.8rem; font-weight: bold; color: #1a73e8; }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.75rem;
+            text-align: center;
+            color: #94a3b8;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -79,6 +87,10 @@
         <div class="res-label">Canaux nécessaires (N)</div>
         <div id="result-n" class="res-value">0</div>
     </div>
+
+    <div class="footer">
+        Outil de dimensionnement réseau professionnel | Créé par Royal
+    </div>
 </div>
 
 <script>
@@ -96,7 +108,6 @@
         let n = 1;
         let b = (A) / (1 + A);
 
-        // Correction de la boucle pour éviter le blocage à 1
         while (b > Pb_target && n < 1000) {
             n++;
             b = (A * b) / (n + (A * b));
