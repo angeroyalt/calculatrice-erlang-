@@ -5,79 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculateur Erlang-B | Royal</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f0f2f5;
+        /* L'apparence du début que tu aimais */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 15px;
+            height: 100vh;
+            margin: 0;
         }
-        .card {
-            background: white;
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; font-size: 1.4rem; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; font-size: 0.9rem; }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: bold;
+        }
         input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px; /* Évite le zoom automatique sur iPhone */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
         }
         button {
             width: 100%;
-            padding: 14px;
-            background-color: #1a73e8;
+            padding: 12px;
+            background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background 0.3s;
+            font-size: 18px;
+            transition: background-color 0.3s;
         }
-        button:hover { background-color: #1557b0; }
-        #result-area {
-            margin-top: 20px;
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 25px;
             padding: 15px;
-            background-color: #e8f0fe;
-            border-radius: 8px;
-            text-align: center;
-            display: none; /* Caché par défaut */
+            background-color: #ecf0f1;
+            border-radius: 6px;
+            font-size: 18px;
+            color: #2c3e50;
+            display: none;
         }
-        .res-label { color: #1967d2; font-size: 0.9rem; margin-bottom: 5px; }
-        .res-value { font-size: 1.8rem; font-weight: bold; color: #1a73e8; }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Dimensionnement Erlang</h2>
+<div class="container">
+    <h1>Calculateur Erlang-B</h1>
     
     <div class="input-group">
-        <label>Trafic offert (Erlangs)</label>
-        <input type="number" id="traffic" step="any" placeholder="Ex: 12.5">
+        <label for="traffic">Trafic offert (A en Erlangs) :</label>
+        <input type="number" id="traffic" step="any" placeholder="Ex: 10.5">
     </div>
 
     <div class="input-group">
-        <label>Qualité de service (Pr)</label>
-        <input type="number" id="blocking" step="any" placeholder="Ex: 0.01">
+        <label for="blocking">Probabilité de blocage (Pb) :</label>
+        <input type="number" id="blocking" step="any" placeholder="Ex: 0.02">
     </div>
 
-    <button onclick="calculate()">Calculer maintenant</button>
+    <button onclick="calculate()">Lancer le calcul</button>
 
-    <div id="result-area">
-        <div class="res-label">Canaux nécessaires (N)</div>
-        <div id="result-n" class="res-value">0</div>
+    <div id="resultBox" class="result">
+        Nombre de canaux requis (N) : <br>
+        <strong id="finalN" style="font-size: 24px; color: #e67e22;">0</strong>
+    </div>
+
+    <div class="footer">
+        Outil de dimensionnement réseau professionnel | Créé par Royal
     </div>
 </div>
 
@@ -85,25 +108,25 @@
     function calculate() {
         const A = parseFloat(document.getElementById('traffic').value);
         const Pb_target = parseFloat(document.getElementById('blocking').value);
-        const resultArea = document.getElementById('result-area');
-        const resultN = document.getElementById('result-n');
+        const resultBox = document.getElementById('resultBox');
+        const displayN = document.getElementById('finalN');
 
         if (isNaN(A) || isNaN(Pb_target) || A <= 0 || Pb_target <= 0) {
-            alert("Veuillez remplir les deux champs avec des nombres positifs.");
+            alert("Veuillez entrer des valeurs valides et positives.");
             return;
         }
 
-        let n = 1;
-        let b = (A) / (1 + A); // Erlang-B pour n=1
+        let N = 1;
+        let B = (A) / (1 + A); // Calcul pour N = 1
 
-        // Boucle itérative pour trouver le N minimal
-        while (b > Pb_target && n < 500) {
-            n++;
-            b = (A * b) / (n + A * b);
+        // Boucle itérative précise
+        while (B > Pb_target && N < 1000) {
+            N++;
+            B = (A * B) / (N + (A * B));
         }
 
-        resultN.innerText = n;
-        resultArea.style.display = 'block';
+        displayN.innerText = N;
+        resultBox.style.display = 'block';
     }
 </script>
 
